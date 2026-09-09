@@ -685,3 +685,41 @@ impl<'d> fmt::Debug for TimerDriver<'d> {
             .finish()
     }
 }
+
+/// # Panics
+///
+/// These will panic if there is no interrupt service registered, see [`TimerDriver::delay`].
+#[cfg(esp_idf_version_at_least_5_1_0)]
+#[cfg_attr(feature = "nightly", doc(cfg(esp_idf_version_at_least_5_1_0)))]
+impl<'d> embedded_hal::delay::DelayNs for TimerDriver<'d> {
+    fn delay_ns(&mut self, ns: u32) {
+        crate::task::block_on(self.delay(Duration::from_nanos(ns.into()))).unwrap();
+    }
+
+    fn delay_us(&mut self, us: u32) {
+        crate::task::block_on(self.delay(Duration::from_micros(us.into()))).unwrap();
+    }
+
+    fn delay_ms(&mut self, ms: u32) {
+        crate::task::block_on(self.delay(Duration::from_millis(ms.into()))).unwrap();
+    }
+}
+
+/// # Panics
+///
+/// These will panic if there is no interrupt service registered, see [`TimerDriver::delay`].
+#[cfg(esp_idf_version_at_least_5_1_0)]
+#[cfg_attr(feature = "nightly", doc(cfg(esp_idf_version_at_least_5_1_0)))]
+impl<'d> embedded_hal_async::delay::DelayNs for TimerDriver<'d> {
+    async fn delay_ns(&mut self, ns: u32) {
+        self.delay(Duration::from_nanos(ns.into())).await.unwrap();
+    }
+
+    async fn delay_us(&mut self, us: u32) {
+        self.delay(Duration::from_micros(us.into())).await.unwrap();
+    }
+
+    async fn delay_ms(&mut self, ms: u32) {
+        self.delay(Duration::from_millis(ms.into())).await.unwrap();
+    }
+}
